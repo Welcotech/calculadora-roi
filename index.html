@@ -365,6 +365,7 @@ function toggleTheme() {
 }
 
 function sv(id, val, suffix) {
+  const el = document.getElementById(id);
   if (!el) return;
   const n = parseFloat(val);
   if (id === 'volume_val') {
