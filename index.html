@@ -235,7 +235,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--ambe
         <label>Volume de movimentações por dia</label>
         <div class="range-wrap">
           <input type="range" id="volume" min="100" max="8000" step="50" value="1000" oninput="sv('volume_val',this.value,'')">
-          <span class="range-val" id="volume_val">1.000</span>
+          <span class="range-val" id="volume_val">1000</span>
         </div>
         <div class="hint">Ciclos de picking, transferência de paletes, abastecimento ou combinação</div>
       </div>
@@ -243,8 +243,8 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--ambe
       <div class="field">
         <label>Taxa de erro atual em picking / separação (%)</label>
         <div class="range-wrap">
-          <input type="range" id="taxa_erro" min="0.1" max="8" step="0.1" value="2.5" oninput="sv('taxa_erro_val',this.value,'%')">
-          <span class="range-val" id="taxa_erro_val">2.5%</span>
+          <input type="range" id="taxa_erro" min="1" max="10" step="1" value="3" oninput="sv('taxa_erro_val',this.value,'%')">
+          <span class="range-val" id="taxa_erro_val">3%</span>
         </div>
         <div class="hint">Itens errados, trocados ou avariados sobre o total separado</div>
       </div>
@@ -261,7 +261,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--ambe
       <div class="field">
         <label>Tempo médio de retrabalho por erro (horas/ocorrência)</label>
         <div class="range-wrap">
-          <input type="range" id="horas_retrab" min="0.5" max="8" step="0.5" value="2" oninput="sv('horas_retrab_val',this.value,'h')">
+          <input type="range" id="horas_retrab" min="1" max="8" step="1" value="2" oninput="sv('horas_retrab_val',this.value,'h')">
           <span class="range-val" id="horas_retrab_val">2h</span>
         </div>
       </div>
@@ -372,12 +372,7 @@ function toggleTheme() {
 function sv(id, val, suffix) {
   const el = document.getElementById(id);
   if (!el) return;
-  const n = parseFloat(val);
-  if (id === 'volume_val') {
-    el.textContent = n.toLocaleString('pt-BR');
-  } else {
-    el.textContent = val + suffix;
-  }
+  el.textContent = Math.round(parseFloat(val)) + suffix;
 }
 
 function goStep(n) {
@@ -482,10 +477,6 @@ function calcular() {
   goStep(3);
   setTimeout(() => document.getElementById('payback_fill').style.width = pct + '%', 100);
 }
-
-document.getElementById('volume').addEventListener('input', function(){
-  sv('volume_val', parseInt(this.value).toLocaleString('pt-BR'), '');
-});
 </script>
 </body>
 </html>
