@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de ROI — Automação AMR | WELCOTECH AUTOMATION SOLUTIONS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090F;
+  --surface:#0F1520;
+  --surface2:#161D2E;
+  --border:#1E2A40;
+  --border2:#2A3A58;
+  --amber:#F5A623;
+  --amber-dim:#7A5010;
+  --text:#E8EDF5;
+  --text2:#7A8CAA;
+  --text3:#4A5870;
+  --green:#22C55E;
+  --red:#EF4444;
+  --blue:#3B82F6;
+  --radius:12px;
+  --radius-sm:8px;
+}
+:root.light{
+  --bg:#F4F5F7;
+  --surface:#FFFFFF;
+  --surface2:#F0F2F5;
+  --border:#DDE1E9;
+  --border2:#C4CBD8;
+  --amber:#C47A0A;
+  --amber-dim:#FDF0D8;
+  --text:#141820;
+  --text2:#4A5568;
+  --text3:#8A96A8;
+  --green:#16A34A;
+  --red:#DC2626;
+}
+.theme-toggle{position:fixed;top:16px;right:16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;z-index:100;transition:background .2s,border-color .2s,color .2s}
+.theme-toggle:hover{border-color:var(--border2);color:var(--text)}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 16px 80px}
+.wrap{width:100%;max-width:680px}
+
+/* Header */
+.header{text-align:center;margin-bottom:48px}
+.logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:28px;font-size:13px;font-weight:500;color:var(--text2);letter-spacing:0.08em;text-transform:uppercase}
+.logo-dot{width:8px;height:8px;background:var(--amber);border-radius:50%}
+h1{font-size:clamp(24px,4vw,36px);font-weight:600;line-height:1.25;color:var(--text);margin-bottom:12px}
+h1 span{color:var(--amber)}
+.subtitle{color:var(--text2);font-size:15px;max-width:480px;margin:0 auto}
+
+/* Progress */
+.progress-bar{display:flex;align-items:center;gap:0;margin-bottom:40px;position:relative}
+.progress-bar::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border);transform:translateY(-50%);z-index:0}
+.step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;z-index:1;border:1px solid var(--border);background:var(--bg);color:var(--text3);flex-shrink:0;transition:all .3s}
+.step-dot.active{background:var(--amber);border-color:var(--amber);color:#000}
+.step-dot.done{background:var(--surface2);border-color:var(--border2);color:var(--amber)}
+.step-label{font-size:11px;color:var(--text3);margin-top:6px;white-space:nowrap;text-align:center}
+.step-item{display:flex;flex-direction:column;align-items:center;flex:1}
+.step-line{flex:1;height:1px;background:var(--border);position:relative;z-index:0}
+.step-line.done{background:var(--border2)}
+
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:24px}
+
+/* Form */
+.field{margin-bottom:24px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:8px}
+.field .hint{font-size:12px;color:var(--text3);margin-top:4px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:480px){.field-row{grid-template-columns:1fr}}
+
+input[type=number],select{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);
+  outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none
+}
+input[type=number]:focus,select:focus{border-color:var(--amber)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237A8CAA' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+
+.range-wrap{display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;background:var(--border);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--amber);border-radius:50%;cursor:pointer;transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--amber);border-radius:50%;cursor:pointer;border:none}
+.range-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--amber);min-width:60px;text-align:right;font-weight:500}
+
+/* Buttons */
+.btn-row{display:flex;gap:12px;justify-content:flex-end;margin-top:32px}
+.btn{padding:11px 24px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .2s}
+.btn:hover{background:var(--surface2);color:var(--text)}
+.btn-primary{background:var(--amber);border-color:var(--amber);color:#000;font-weight:600}
+.btn-primary:hover{background:#e09918;border-color:#e09918;color:#000}
+
+/* Results */
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+@media(max-width:480px){.results-grid{grid-template-columns:1fr}}
+.metric{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px}
+.metric.highlight{border-color:var(--amber-dim);background:#0F1520}
+.metric.highlight .metric-val{color:var(--amber)}
+.metric.green .metric-val{color:var(--green)}
+.metric-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:6px}
+.metric-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--text);line-height:1.2}
+.metric-sub{font-size:12px;color:var(--text3);margin-top:4px}
+
+.payback-bar{margin:24px 0}
+.payback-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.payback-fill{height:100%;background:var(--amber);border-radius:3px;transition:width 1s ease}
+.payback-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px}
+
+.breakdown{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:24px}
+.breakdown-row{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);font-size:13px}
+.breakdown-row:last-child{border-bottom:none}
+.breakdown-row.total{background:var(--surface2);font-weight:500}
+.breakdown-label{color:var(--text2)}
+.breakdown-val{font-family:'DM Mono',monospace;color:var(--text);font-size:13px}
+.breakdown-val.neg{color:var(--red)}
+.breakdown-val.pos{color:var(--green)}
+
+.disclaimer{font-size:11px;color:var(--text3);line-height:1.6;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:24px}
+
+/* CTA */
+.cta{background:linear-gradient(135deg,#0F1A2E 0%,#0F1520 100%);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;text-align:center}
+.cta h3{font-size:20px;font-weight:600;margin-bottom:8px}
+.cta p{color:var(--text2);font-size:14px;margin-bottom:24px;max-width:420px;margin-left:auto;margin-right:auto}
+.cta-bullets{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;text-align:left;max-width:320px;margin-left:auto;margin-right:auto}
+.cta-bullet{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2)}
+.cta-bullet::before{content:'';width:6px;height:6px;background:var(--amber);border-radius:50%;flex-shrink:0;margin-top:5px}
+.btn-cta{display:inline-block;background:var(--amber);color:#000;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:14px 32px;border-radius:var(--radius-sm);border:none;cursor:pointer;text-decoration:none;transition:background .2s}
+.btn-cta:hover{background:#e09918}
+.cta-note{font-size:11px;color:var(--text3);margin-top:12px}
+
+/* Separator */
+.sep{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+/* Steps visibility */
+.step-pane{display:none}.step-pane.active{display:block}
+
+/* Input prefix */
+.input-prefix{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;transition:border-color .2s}
+.input-prefix:focus-within{border-color:var(--amber)}
+.prefix-label{padding:10px 12px;font-size:13px;color:var(--text3);background:var(--bg);border-right:1px solid var(--border);flex-shrink:0}
+.input-prefix input{border:none;background:transparent;border-radius:0;width:100%;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none}
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">&#9790; Modo claro</button>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo"><div class="logo-dot"></div>WELCOTECH AUTOMATION SOLUTIONS</div>
+    <h1>Quanto custa <span>não automatizar</span><br>sua operação hoje?</h1>
+    <p class="subtitle">Preencha os dados abaixo e descubra em 2 minutos o potencial de ROI com robôs AMR na sua intralogística.</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar" style="padding:0 16px;margin-bottom:40px">
+    <div class="step-item">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-label">Mão de obra</div>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-item">
+      <div class="step-dot" id="dot2">2</div>
+      <div class="step-label">Operação</div>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-item">
+      <div class="step-dot" id="dot3">3</div>
+      <div class="step-label">Resultado</div>
+    </div>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-pane active" id="pane1">
+    <div class="card">
+      <div class="card-title">Dados de mão de obra</div>
+
+      <div class="field">
+        <label>Operadores no processo de movimentação</label>
+        <div class="range-wrap">
+          <input type="range" id="op_count" min="1" max="150" step="1" value="10" oninput="sv('op_count_val',this.value,'')">
+          <span class="range-val" id="op_count_val">10</span>
+        </div>
+        <div class="hint">Inclua picking, separação, abastecimento de linhas e conferência</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Salário médio mensal por operador</label>
+          <div class="input-prefix">
+            <span class="prefix-label">R$</span>
+            <input type="number" id="salario" value="3500" min="1500" max="12000" step="100">
+          </div>
+          <div class="hint">Apenas salário base (sem encargos)</div>
+        </div>
+        <div class="field">
+          <label>Turnos por dia</label>
+          <select id="turnos">
+            <option value="1">1 turno (8h)</option>
+            <option value="2" selected>2 turnos (16h)</option>
+            <option value="3">3 turnos (24h)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Dias trabalhados por mês</label>
+        <div class="range-wrap">
+          <input type="range" id="dias_mes" min="18" max="30" step="1" value="22" oninput="sv('dias_mes_val',this.value,' dias')">
+          <span class="range-val" id="dias_mes_val">22 dias</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep(2)">Próximo &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-pane" id="pane2">
+    <div class="card">
+      <div class="card-title">Dados da operação</div>
+
+      <div class="field">
+        <label>Volume de movimentações por dia</label>
+        <div class="range-wrap">
+          <input type="range" id="volume" min="100" max="8000" step="50" value="1000" oninput="sv('volume_val',this.value,'')">
+          <span class="range-val" id="volume_val">1.000</span>
+        </div>
+        <div class="hint">Ciclos de picking, transferência de paletes, abastecimento ou combinação</div>
+      </div>
+
+      <div class="field">
+        <label>Taxa de erro atual em picking / separação (%)</label>
+        <div class="range-wrap">
+          <input type="range" id="taxa_erro" min="0.1" max="8" step="0.1" value="2.5" oninput="sv('taxa_erro_val',this.value,'%')">
+          <span class="range-val" id="taxa_erro_val">2.5%</span>
+        </div>
+        <div class="hint">Itens errados, trocados ou avariados sobre o total separado</div>
+      </div>
+
+      <div class="field">
+        <label>Valor médio do pedido / lote com erro</label>
+        <div class="input-prefix">
+          <span class="prefix-label">R$</span>
+          <input type="number" id="valor_item" value="850" min="50" max="50000" step="50">
+        </div>
+        <div class="hint">Valor médio do pedido ou nota que gera retrabalho quando há erro</div>
+      </div>
+
+      <div class="field">
+        <label>Tempo médio de retrabalho por erro (horas/ocorrência)</label>
+        <div class="range-wrap">
+          <input type="range" id="horas_retrab" min="0.5" max="8" step="0.5" value="2" oninput="sv('horas_retrab_val',this.value,'h')">
+          <span class="range-val" id="horas_retrab_val">2h</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(1)">&larr; Voltar</button>
+      <button class="btn btn-primary" onclick="calcular()">Calcular ROI</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Results -->
+  <div class="step-pane" id="pane3">
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Custo atual da sua operação</div>
+      <div class="results-grid">
+        <div class="metric">
+          <div class="metric-label">Custo CLT anual</div>
+          <div class="metric-val" id="r_clt">—</div>
+          <div class="metric-sub">operadores + encargos 70%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Custo de erros / retrabalho</div>
+          <div class="metric-val" id="r_erros">—</div>
+          <div class="metric-sub">perdas + horas improdutivas</div>
+        </div>
+        <div class="metric highlight" style="grid-column:1/-1">
+          <div class="metric-label">Custo operacional total anual</div>
+          <div class="metric-val" id="r_total_atual">—</div>
+          <div class="metric-sub">CLT + erros + overhead estimado</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Projeção com automação AMR</div>
+      <div class="results-grid">
+        <div class="metric green">
+          <div class="metric-label">Economia anual estimada</div>
+          <div class="metric-val" id="r_economia">—</div>
+          <div class="metric-sub">redução real de custos/ano</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Investimento estimado</div>
+          <div class="metric-val" id="r_invest">—</div>
+          <div class="metric-sub">AMRs + implementação</div>
+        </div>
+        <div class="metric highlight">
+          <div class="metric-label">Payback</div>
+          <div class="metric-val" id="r_payback">—</div>
+          <div class="metric-sub">meses para retorno do investimento</div>
+        </div>
+        <div class="metric green">
+          <div class="metric-label">ROI em 5 anos</div>
+          <div class="metric-val" id="r_roi5">—</div>
+          <div class="metric-sub">ganho líquido acumulado</div>
+        </div>
+      </div>
+
+      <div class="payback-bar">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)">
+          <span>Progresso ao payback</span>
+          <span id="r_payback_pct">—</span>
+        </div>
+        <div class="payback-track"><div class="payback-fill" id="payback_fill" style="width:0%"></div></div>
+        <div class="payback-labels"><span>0 meses</span><span>12 meses</span><span>24 meses</span><span>36 meses</span><span>48+ meses</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Memória de cálculo</div>
+      <div class="breakdown" id="breakdown_table"></div>
+      <div class="disclaimer">
+        Estimativas baseadas em benchmarks de projetos AMR em intralogística brasileira (2022–2024). Encargos CLT calculados em 70% sobre salário base (FGTS, INSS, férias, 13.º, vale-transporte, vale-alimentação). Custo unitário de AMR considerado R$ 200.000–R$ 280.000 por unidade (plataforma Hikrobot QF/MR). Valores são referenciais — um estudo técnico formal pode refinar todas as variáveis para a sua operação específica.
+      </div>
+    </div>
+
+    <div class="cta">
+      <h3>Quer um estudo personalizado?</h3>
+      <p>Nossa equipe analisa sua planta, seus fluxos reais e entrega uma proposta com ROI detalhado — sem custo e sem compromisso.</p>
+      <div class="cta-bullets">
+        <div class="cta-bullet">Mapeamento da operação em 45 minutos (online ou presencial)</div>
+        <div class="cta-bullet">Proposta técnica com layout de rota dos AMRs</div>
+        <div class="cta-bullet">Três modalidades: CAPEX, importação direta ou leasing OPEX</div>
+        <div class="cta-bullet">Integração com seu WMS atual (SAP, TOTVS, Oracle)</div>
+      </div>
+      <a class="btn-cta" href="https://www.linkedin.com/in/cesarfracalanza" target="_blank">Falar com um especialista Welcotech</a>
+      <div class="cta-note">Resposta em até 24 horas &bull; Sem pressão comercial</div>
+    </div>
+
+    <div style="text-align:center;margin-top:32px">
+      <button class="btn" onclick="goStep(1)">Recalcular com outros dados</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  const btn = document.getElementById('theme-btn');
+  btn.innerHTML = isLight ? '&#9788; Modo escuro' : '&#9790; Modo claro';
+}
+
+  const el = document.getElementById(id);
+  if (!el) return;
+  const n = parseFloat(val);
+  if (id === 'volume_val') {
+    el.textContent = n.toLocaleString('pt-BR');
+  } else {
+    el.textContent = val + suffix;
+  }
+}
+
+function goStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('pane'+i).classList.toggle('active', i===n);
+    const dot = document.getElementById('dot'+i);
+    dot.classList.remove('active','done');
+    if (i < n) dot.classList.add('done');
+    if (i === n) dot.classList.add('active');
+    if (i < 3) {
+      const line = document.getElementById('line'+i);
+      line.classList.toggle('done', i < n);
+    }
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function brl(val) {
+  return 'R$ ' + Math.round(val).toLocaleString('pt-BR');
+}
+
+function calcular() {
+  const op = parseInt(document.getElementById('op_count').value);
+  const sal = parseFloat(document.getElementById('salario').value);
+  const turnos = parseInt(document.getElementById('turnos').value);
+  const diasMes = parseInt(document.getElementById('dias_mes').value);
+  const volume = parseInt(document.getElementById('volume').value);
+  const taxaErro = parseFloat(document.getElementById('taxa_erro').value) / 100;
+  const valorItem = parseFloat(document.getElementById('valor_item').value);
+  const horasRetrab = parseFloat(document.getElementById('horas_retrab').value);
+
+  // --- CUSTO ATUAL ---
+  const encargos = 0.70;
+  const custoMensalOp = sal * (1 + encargos);
+  const custoAnualCLT = op * custoMensalOp * 12;
+  const overhead = custoAnualCLT * 0.18;
+
+  const errosPorDia = volume * taxaErro;
+  const diasAno = diasMes * 12;
+  const custoErroItem = errosPorDia * diasAno * valorItem * 0.35;
+  const custoHorasRetrab = errosPorDia * diasAno * horasRetrab * (sal / 176);
+  const custoErroTotal = custoErroItem + custoHorasRetrab;
+  const totalAtual = custoAnualCLT + overhead + custoErroTotal;
+
+  // --- ESTIMATIVA AMR ---
+  const movPorRobo = 280 * turnos;
+  const amrsNecessarios = Math.max(1, Math.ceil((volume * 0.65) / movPorRobo));
+  const custoUnitario = 240000;
+  const custoEquip = amrsNecessarios * custoUnitario;
+  const custoImpl = custoEquip * 0.22;
+  const investTotal = custoEquip + custoImpl;
+
+  // --- CUSTO PÓS-AUTOMAÇÃO ---
+  const opRemanescentes = Math.max(1, Math.ceil(op * 0.35));
+  const custoAnualCLTNovo = opRemanescentes * custoMensalOp * 12;
+  const manutAnual = amrsNecessarios * 16000;
+  const overheadNovo = custoAnualCLTNovo * 0.12;
+  const taxaErroAMR = 0.001;
+  const errosPorDiaAMR = volume * taxaErroAMR;
+  const custoErroNovo = errosPorDiaAMR * diasAno * valorItem * 0.35 + errosPorDiaAMR * diasAno * horasRetrab * (sal/176);
+  const totalNovo = custoAnualCLTNovo + manutAnual + overheadNovo + custoErroNovo;
+
+  const economiaAnual = totalAtual - totalNovo;
+  const paybackMeses = Math.round((investTotal / economiaAnual) * 12);
+  const roi5anos = (economiaAnual * 5) - investTotal;
+
+  // --- OUTPUT ---
+  document.getElementById('r_clt').textContent = brl(custoAnualCLT);
+  document.getElementById('r_erros').textContent = brl(custoErroTotal);
+  document.getElementById('r_total_atual').textContent = brl(totalAtual);
+  document.getElementById('r_economia').textContent = brl(economiaAnual);
+  document.getElementById('r_invest').textContent = brl(investTotal);
+  document.getElementById('r_payback').textContent = paybackMeses + ' meses';
+  document.getElementById('r_roi5').textContent = brl(roi5anos);
+  document.getElementById('r_payback_pct').textContent = paybackMeses + ' / 48 meses';
+
+  const pct = Math.min(100, Math.round((paybackMeses / 48) * 100));
+  document.getElementById('payback_fill').style.width = pct + '%';
+
+  const rows = [
+    ['Operadores atuais', op + ' pessoas', null],
+    ['Custo CLT total (c/ encargos)', brl(custoAnualCLT), 'neg'],
+    ['Overhead operacional (18%)', brl(overhead), 'neg'],
+    ['Custo de erros e retrabalho', brl(custoErroTotal), 'neg'],
+    ['Total custo atual', brl(totalAtual), 'neg'],
+    ['AMRs necessários (est.)', amrsNecessarios + ' unidades', null],
+    ['Investimento total (equip. + impl.)', brl(investTotal), null],
+    ['Operadores remanescentes', opRemanescentes + ' pessoas', null],
+    ['Novo custo CLT anual', brl(custoAnualCLTNovo), null],
+    ['Manutenção anual AMRs', brl(manutAnual), null],
+    ['Economia anual líquida', brl(economiaAnual), 'pos'],
+  ];
+
+  const tbody = rows.map(([l, v, cls], i) => {
+    const isTotal = l.startsWith('Total');
+    const totalClass = isTotal ? ' total' : '';
+    const valClass = cls ? ` class="breakdown-val ${cls}"` : ' class="breakdown-val"';
+    return `<div class="breakdown-row${totalClass}"><span class="breakdown-label">${l}</span><span${valClass}>${v}</span></div>`;
+  }).join('');
+  document.getElementById('breakdown_table').innerHTML = tbody;
+
+  goStep(3);
+  setTimeout(() => document.getElementById('payback_fill').style.width = pct + '%', 100);
+}
+
+document.getElementById('volume').addEventListener('input', function(){
+  sv('volume_val', parseInt(this.value).toLocaleString('pt-BR'), '');
+});
+</script>
+</body>
+</html>
